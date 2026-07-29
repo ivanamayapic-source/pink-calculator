@@ -1,5 +1,5 @@
 /**
- * PINK GLAM CALCULATOR - CORE APPLICATION LOGIC WITH SUPABASE CLOUD SYNC
+ * GREEN GLAM CALCULATOR - CORE APPLICATION LOGIC WITH SUPABASE CLOUD SYNC
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     angleUnit: 'DEG', // 'DEG' or 'RAD'
     isScientific: false,
     soundEnabled: true,
-    theme: 'neon', // 'neon' or 'pastel'
+    theme: 'neon', // 'neon' (Emerald) or 'pastel' (Mint)
     history: JSON.parse(localStorage.getItem('pinkcalc_history') || '[]'),
     shouldResetDisplay: false,
     
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
     playSound(700, 'sine', 0.04);
     state.theme = state.theme === 'neon' ? 'pastel' : 'neon';
     document.documentElement.setAttribute('data-theme', state.theme);
-    showToast(state.theme === 'neon' ? 'Tema: Rosa Neón 💖' : 'Tema: Rosa Pastel 🌸');
+    showToast(state.theme === 'neon' ? 'Tema: Verde Neón 💚' : 'Tema: Verde Menta 🍃');
   });
 
   document.getElementById('btn-history-toggle').addEventListener('click', () => {
@@ -576,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-copy').addEventListener('click', () => {
     navigator.clipboard.writeText(state.currentInput).then(() => {
-      showToast('¡Resultado copiado! 📋💖');
+      showToast('¡Resultado copiado! 🌿');
       playSound(900, 'sine', 0.05);
     }).catch(() => {
       showToast('Error al copiar');
