@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="neon">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Rosada - Pink Glam Calculator + Supabase Cloud</title>
+  <meta name="description" content="Una elegante calculadora rosada interactiva con modo científico, historial en la nube con Supabase, sonidos y temas Neón y Pastel.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for crisp icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <main class="calculator-container" id="calculator">
+    
+    <!-- Top Bar Controls -->
+    <header class="calc-header">
+      <div class="brand">
+        <i class="fa-solid fa-wand-magic-sparkles brand-icon"></i>
+        <span>PinkCalc</span>
+      </div>
+      
+      <div class="header-actions">
+        <button id="btn-supabase" class="icon-btn pill-btn" title="Configurar Conexión a Supabase">
+          <i class="fa-solid fa-cloud"></i>
+          <span class="cloud-dot disconnected" id="cloud-dot"></span>
+        </button>
+
+        <button id="btn-angle" class="icon-btn pill-btn" title="Cambiar Grados/Radianes">
+          <span id="angle-mode">DEG</span>
+        </button>
+
+        <button id="btn-mode-toggle" class="icon-btn pill-btn" title="Cambiar a Modo Científico/Estándar">
+          <i class="fa-solid fa-flask"></i>
+          <span id="mode-text">Científica</span>
+        </button>
+        
+        <button id="btn-sound" class="icon-btn" title="Activar/Desactivar Sonido">
+          <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+        </button>
+
+        <button id="btn-theme" class="icon-btn" title="Cambiar Tema (Rosa Neón / Rosa Pastel)">
+          <i class="fa-solid fa-palette"></i>
+        </button>
+
+        <button id="btn-history-toggle" class="icon-btn" title="Ver Historial (Local + Nube)">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Display Section -->
+    <section class="display-section" id="display-container">
+      <div class="display-status">
+        <span class="status-badge" id="badge-angle">DEG</span>
+        <span class="status-badge" id="badge-memory" style="display:none;">M</span>
+        <span class="status-badge" id="badge-sci" style="display:none;">SCI</span>
+        <span class="status-badge status-cloud" id="badge-cloud-status">Local</span>
+      </div>
+
+      <div class="expression-display" id="expression" title="Expresión actual"></div>
+      
+      <div class="main-display-row">
+        <button class="copy-btn" id="btn-copy" title="Copiar Resultado">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+        <div class="main-display" id="main-display">0</div>
+      </div>
+    </section>
+
+    <!-- Keypad Section -->
+    <section class="keypad-section">
+
+      <!-- Scientific Grid (Collapsible/Toggleable) -->
+      <div class="scientific-keypad" id="scientific-grid">
+        <button class="btn btn-sci" data-action="sin">sin</button>
+        <button class="btn btn-sci" data-action="cos">cos</button>
+        <button class="btn btn-sci" data-action="tan">tan</button>
+        <button class="btn btn-sci" data-action="asin">asin</button>
+        
+        <button class="btn btn-sci" data-action="acos">acos</button>
+        <button class="btn btn-sci" data-action="atan">atan</button>
+        <button class="btn btn-sci" data-action="ln">ln</button>
+        <button class="btn btn-sci" data-action="log">log</button>
+
+        <button class="btn btn-sci" data-action="sqrt">√x</button>
+        <button class="btn btn-sci" data-action="square">x²</button>
+        <button class="btn btn-sci" data-action="power">x^y</button>
+        <button class="btn btn-sci" data-action="factorial">n!</button>
+
+        <button class="btn btn-sci" data-action="pi">π</button>
+        <button class="btn btn-sci" data-action="e">e</button>
+        <button class="btn btn-sci" data-action="reciprocal">1/x</button>
+        <button class="btn btn-sci" data-action="ans">Ans</button>
+      </div>
+
+      <!-- Memory & Auxiliary Row -->
+      <div class="aux-row">
+        <button class="btn btn-mem" data-action="mc">MC</button>
+        <button class="btn btn-mem" data-action="mr">MR</button>
+        <button class="btn btn-mem" data-action="m-plus">M+</button>
+        <button class="btn btn-mem" data-action="m-minus">M-</button>
+      </div>
+
+      <!-- Standard Keypad Grid -->
+      <div class="standard-keypad">
+        <button class="btn btn-fn btn-danger" data-action="clear">AC</button>
+        <button class="btn btn-fn" data-action="backspace"><i class="fa-solid fa-backspace"></i></button>
+        <button class="btn btn-fn" data-action="parens">( )</button>
+        <button class="btn btn-operator" data-action="op" data-value="÷">÷</button>
+
+        <button class="btn btn-num" data-value="7">7</button>
+        <button class="btn btn-num" data-value="8">8</button>
+        <button class="btn btn-num" data-value="9">9</button>
+        <button class="btn btn-operator" data-action="op" data-value="×">×</button>
+
+        <button class="btn btn-num" data-value="4">4</button>
+        <button class="btn btn-num" data-value="5">5</button>
+        <button class="btn btn-num" data-value="6">6</button>
+        <button class="btn btn-operator" data-action="op" data-value="-">-</button>
+
+        <button class="btn btn-num" data-value="1">1</button>
+        <button class="btn btn-num" data-value="2">2</button>
+        <button class="btn btn-num" data-value="3">3</button>
+        <button class="btn btn-operator" data-action="op" data-value="+">+</button>
+
+        <button class="btn btn-fn" data-action="negate">±</button>
+        <button class="btn btn-num" data-value="0">0</button>
+        <button class="btn btn-num" data-value=".">.</button>
+        <button class="btn btn-equals" data-action="calculate">=</button>
+      </div>
+
+    </section>
+
+    <!-- History Drawer Overlay -->
+    <aside class="history-panel" id="history-panel">
+      <div class="history-header">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Historial <span id="history-source-tag">(Local)</span></h3>
+        <button id="btn-close-history" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="history-list" id="history-list">
+        <p class="empty-history">No hay operaciones recientes</p>
+      </div>
+      <div class="history-footer">
+        <button id="btn-clear-history" class="text-btn"><i class="fa-solid fa-trash-can"></i> Borrar Historial</button>
+      </div>
+    </aside>
+
+    <!-- Supabase Configuration Modal Overlay -->
+    <div class="modal-overlay" id="supabase-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-database"></i> Conectar a Supabase</h3>
+          <button id="btn-close-modal" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Ingresa las credenciales de tu proyecto en Supabase para sincronizar tu historial en la nube.</p>
+          
+          <div class="form-group">
+            <label for="input-supabase-url">Project URL (`SUPABASE_URL`):</label>
+            <input type="text" id="input-supabase-url" placeholder="https://xyz.supabase.co">
+          </div>
+
+          <div class="form-group">
+            <label for="input-supabase-key">Anon Public Key (`SUPABASE_ANON_KEY`):</label>
+            <input type="password" id="input-supabase-key" placeholder="eyJhbGciOiJIUzI1NiI...">
+          </div>
+
+          <div class="sql-box-container">
+            <label>Código SQL para crear la tabla en Supabase:</label>
+            <pre class="sql-box" id="sql-snippet">create table calculations (
+  id uuid default gen_random_uuid() primary key,
+  expression text not null,
+  result text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table calculations enable row level security;
+create policy "Permitir insercion publica" on calculations for insert with check (true);
+create policy "Permitir lectura publica" on calculations for select using (true);</pre>
+            <button class="text-btn" id="btn-copy-sql"><i class="fa-regular fa-copy"></i> Copiar Código SQL</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="btn-disconnect-supabase">Desconectar</button>
+          <button class="btn-primary" id="btn-save-supabase">Conectar y Sincronizar</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">¡Copiado al portapapeles! 💖</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
